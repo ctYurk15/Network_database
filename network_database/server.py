@@ -10,6 +10,16 @@ def write(data, name):
         file.write(data)
         file.write('\n')
 
+#send data
+def send_data(name, user_socket):
+    path = 'datas/' + name + '.txt'
+    name = bytes(name, 'utf-8')
+    user_socket.send(name)
+    with open(path, 'r') as file:
+        msg = file.read()
+        msg = bytes(msg, 'utf-8')
+        user_socket.send(msg)
+
 #connections
 def connected(user_socket, addr):
     users.append(user_socket)
@@ -22,6 +32,9 @@ def connected(user_socket, addr):
         if info == '/escape':
             connected = False
             print('| Disconnection from {}'.format(addr), '|')
+        elif info == '/download':
+            send_data(name, user_socket)
+            print('| Send', name, 'to', addr, '|')
         else:
             print('| From', addr, 'send:', info, 'to', name, '|')
             write(info, name)

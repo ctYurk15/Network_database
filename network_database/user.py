@@ -7,16 +7,14 @@ def send_data(data):
     s.send(data)
 
 #receive
-def receive():
-    global connection
-    while connection:
-        name = s.recv(1024).decode()
-        data = s.recv(1024).decode()
-        path = 'downloads/' + name + '.txt'
-        with open(path, 'a') as file:
-            file.write(data)
-            file.write('\n')
-        print(name, 'downloaded succesfully')
+def download():
+    name = s.recv(1024).decode()
+    data = s.recv(1024).decode()
+    path = 'downloads/' + name + '.txt'
+    with open(path, 'a') as file:
+        file.write(data)
+        file.write('\n')
+    print(name, 'downloaded succesfully')
 
 #connection to server
 s = socket()
@@ -31,15 +29,15 @@ name = bytes(name, 'utf-8')
 s.send(name)
 
 connection = True
-#reciving thread
-Thread(None, receive).start()
-
 #connection loop
 while connection:
     i = input()
     if i == '/escape':
         connection = False
         send_data(i)
+    elif i == '/download':
+        send_data(i)
+        download()
     else:
         send_data(i)
 

@@ -1,5 +1,5 @@
 from socket import socket, gethostname
-from threading import Thread
+from maker import divide_words
 
 #send data
 def send_data(data):
@@ -23,23 +23,34 @@ host = gethostname()
 s.connect((host, port))
 print('Connected succesfully...')
 
-#send name
-name = input('Chose name of data: ')
-name = bytes(name, 'utf-8')
-s.send(name)
-
-connection = True
 #connection loop
+connection = True
 while connection:
     i = input()
     if i == '/escape':
         connection = False
         send_data(i)
-    elif i == '/download':
-        send_data(i)
+    elif i.count('/download') == 1:
+        send_data('/download')
+        i = divide_words(i)
+        n = i[1]
+        send_data(n)
         download()
+    elif i.count('/redact') == 1:
+        send_data('/redact')
+        i = divide_words(i)
+        n = i[1]
+        send_data(n)
+        redact = True
+        while redact:
+            msg = input('Add: ')
+            if msg != '/end':
+                send_data(msg)
+            else:
+                send_data(msg)
+                redact = False
     else:
-        send_data(i)
+        print('What? Please, log again.')
 
 s.close()
 

@@ -24,8 +24,6 @@ def send_data(name, user_socket):
 def connected(user_socket, addr):
     users.append(user_socket)
     print('| New connection from: {}'.format(addr), '|')
-    name = user_socket.recv(1024).decode()
-    print('| From', addr, 'editing', name, '|')
     connected = True
     while connected:
         info = user_socket.recv(1024).decode()
@@ -33,11 +31,23 @@ def connected(user_socket, addr):
             connected = False
             print('| Disconnection from {}'.format(addr), '|')
         elif info == '/download':
+            name = user_socket.recv(1024).decode()
             send_data(name, user_socket)
+            name = ''
             print('| Send', name, 'to', addr, '|')
-        else:
-            print('| From', addr, 'send:', info, 'to', name, '|')
-            write(info, name)
+        elif info == '/redact':
+            name = user_socket.recv(1024).decode()
+            print('| From', addr, 'redact', name, '|')
+            redact = True
+            while redact:
+                data = user_socket.recv(1024).decode()
+                if data != '/end':
+                    write(data, name)
+                    print('| From', addr, 'added to', name, data, '|')
+                else:
+                    redact = False
+                    print('| End redacting', name, 'from', addr, '|')
+            name = ''
     users.remove(user_socket)
     user_socket.close()
 

@@ -11,7 +11,7 @@ def download():
     name = s.recv(1024).decode()
     data = s.recv(1024).decode()
     path = 'downloads/' + name + '.txt'
-    with open(path, 'a') as file:
+    with open(path, 'w') as file:
         file.write(data)
         file.write('\n')
     print(name, 'downloaded succesfully')
@@ -36,12 +36,24 @@ while connection:
         n = i[1]
         send_data(n)
         download()
+    elif i.count('/create') == 1:
+        send_data('/create')
+        i = divide_words(i)
+        n = i[1]
+        send_data(n)
+        msg = s.recv(1024).decode()
+        print(msg)
     elif i.count('/redact') == 1:
         send_data('/redact')
         i = divide_words(i)
         n = i[1]
         send_data(n)
-        redact = True
+        msg = s.recv(1024).decode()
+        print(msg)
+        if msg == 'Yes':
+            redact = True
+        else:
+            redact = False
         while redact:
             msg = input('Add: ')
             if msg != '/end':

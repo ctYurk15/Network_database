@@ -1,0 +1,6 @@
+Created by ('192.168.1.104', 58135)
+New update
+I mean, new commend add - create
+Before redact file, you must create file
+using /create [name]
+

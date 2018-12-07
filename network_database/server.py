@@ -10,6 +10,15 @@ def write(data, name):
         file.write(data)
         file.write('\n')
 
+#creating a blank file
+def create_file(name, addr):
+    addr = str(addr)
+    path = 'datas/' + name + '.txt'
+    with open(path, 'a') as file:
+        file.write('Created by ')
+        file.write(addr)
+        file.write('\n')
+
 #send data
 def send_data(name, user_socket):
     path = 'datas/' + name + '.txt'
@@ -19,6 +28,11 @@ def send_data(name, user_socket):
         msg = file.read()
         msg = bytes(msg, 'utf-8')
         user_socket.send(msg)
+
+#send_msg
+def send(msg, user_socket):
+    msg = bytes(msg, 'utf-8')
+    user_socket.send(msg)
 
 #connections
 def connected(user_socket, addr):
@@ -33,21 +47,35 @@ def connected(user_socket, addr):
         elif info == '/download':
             name = user_socket.recv(1024).decode()
             send_data(name, user_socket)
-            name = ''
             print('| Send', name, 'to', addr, '|')
+            name = ''
+        elif info == '/create':
+            name = user_socket.recv(1024).decode()
+            create_file(name, addr)
+            print('| Created', name, 'by', addr, '|')
+            msg = 'Creating a file with name ' + name + ' completed succesfully'
+            send(msg, user_socket)
+            name = ''
         elif info == '/redact':
             name = user_socket.recv(1024).decode()
-            print('| From', addr, 'redact', name, '|')
-            redact = True
-            while redact:
-                data = user_socket.recv(1024).decode()
-                if data != '/end':
-                    write(data, name)
-                    print('| From', addr, 'added to', name, data, '|')
-                else:
-                    redact = False
-                    print('| End redacting', name, 'from', addr, '|')
-            name = ''
+            path = 'datas/' + name + '.txt'
+            try:
+                file = open(path, 'r')
+            except:
+                send('No', user_socket)
+            else:
+                send('Yes', user_socket)
+                print('| From', addr, 'redact', name, '|')
+                redact = True
+                while redact:
+                    data = user_socket.recv(1024).decode()
+                    if data != '/end':
+                        write(data, name)
+                        print('| From', addr, 'added to', name, data, '|')
+                    else:
+                        redact = False
+                        print('| End redacting', name, 'from', addr, '|')
+                name = ''
     users.remove(user_socket)
     user_socket.close()
 

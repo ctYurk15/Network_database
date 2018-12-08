@@ -11,23 +11,34 @@ def write(data, name):
         file.write('\n')
 
 #creating a blank file
-def create_file(name, addr):
+def create_file(name, addr, user_socket):
     addr = str(addr)
     path = 'datas/' + name + '.txt'
-    with open(path, 'a') as file:
-        file.write('Created by ')
-        file.write(addr)
-        file.write('\n')
+    try:
+        file = open(path, 'r')
+    except:
+        send('No', user_socket)
+        with open(path, 'a') as file:
+            file.write('Created by')
+            file.write(addr)
+            file.write('\n')
+        print('| Created file', name, 'by', addr, '|')
+    else:
+        send('Yes', user_socket)
+        
 
 #send data
 def send_data(name, user_socket):
     path = 'datas/' + name + '.txt'
-    name = bytes(name, 'utf-8')
-    user_socket.send(name)
-    with open(path, 'r') as file:
-        msg = file.read()
-        msg = bytes(msg, 'utf-8')
-        user_socket.send(msg)
+    try:
+        file = open(path, 'r')
+    except:
+        send('No', user_socket)
+    else:
+        send(name, user_socket)
+        data = file.read()
+        send(data, user_socket)
+    name = ''
 
 #send_msg
 def send(msg, user_socket):
@@ -49,12 +60,9 @@ def connected(user_socket, addr):
             send_data(name, user_socket)
             print('| Send', name, 'to', addr, '|')
             name = ''
-        elif info == '/create':
+        elif info == '/createfile':
             name = user_socket.recv(1024).decode()
-            create_file(name, addr)
-            print('| Created', name, 'by', addr, '|')
-            msg = 'Creating a file with name ' + name + ' completed succesfully'
-            send(msg, user_socket)
+            create_file(name, addr, user_socket)
             name = ''
         elif info == '/redact':
             name = user_socket.recv(1024).decode()
